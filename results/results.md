@@ -22,4 +22,4 @@ This folder contains the main evaluation figures from my Master’s thesis:
 
 ## More Information
 For additional explanations, methodology, and detailed analysis, please refer to the full thesis:  
-👉 [`thesis.pdf`](../thesis.pdf)
+👉 [`thesis.pdf`](../Yagiz_Soyleguzel_thesis.pdf)
