@@ -15,7 +15,7 @@ The research focuses on applying **Reinforcement Learning (TD3)** to improve act
 - **Year:** 2025  
 - **Keywords:** Reinforcement Learning, TD3, Active Suspension, Vehicle Dynamics, Robotics, Control Systems  
 
-📄 Full thesis: [`thesis.pdf`](thesis.pdf)
+📄 Full thesis: [`thesis.pdf`](Yagiz_Soyleguzel_thesis.pdf)
 
 ---
 
@@ -54,7 +54,7 @@ Example plots (from `results/` folder):
 ---
 
 ## 📂 Repository Contents
-- `thesis.pdf` – full thesis document  
+- `Yagiz_Soyleguzel_thesis.pdf` – full thesis document  
 - `td3_active_suspension_nonlinear.py` – nonlinear quarter-car environment & TD3 training script  
 - `evaluations.py` – evaluation and plotting framework  
 - `results/` – generated figures, tables, and analysis plots  
