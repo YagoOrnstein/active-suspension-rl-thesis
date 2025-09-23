@@ -19,10 +19,10 @@ warnings.filterwarnings('ignore')
 np.random.seed(42); torch.manual_seed(42); random.seed(42)
 
 # ============ Enhanced config ============
-MAX_STEPS_PER_EPISODE = 2500  # longer episodes for complex dynamics
-FAST_PREVIEW_POINTS   = 12    # slightly more preview for complex terrain
-EXPLORATION_EPISODES  = 180   # more exploration for complex system
-CURRICULUM_MILESTONES = (30, 60, 120)  # slower curriculum
+MAX_STEPS_PER_EPISODE = 2500  
+FAST_PREVIEW_POINTS   = 12    
+EXPLORATION_EPISODES  = 180   
+CURRICULUM_MILESTONES = (30, 60, 120)  
 LEARNING_STARTS_STEPS = 25_000
 
 # Stabilization & optimization
@@ -127,7 +127,7 @@ class NonlinearQuarterCarModel:
         self.kt = self.kt_base
 
         self.s_pos = 0.0
-        self.speed = 25.0  # start slightly higher
+        self.speed = 25.0  
 
         self.road_x = None
         self.road_profile = self.generate_enhanced_road()
@@ -362,7 +362,7 @@ class NonlinearQuarterCarModel:
         self.u_applied += (self.dt/self.tau_actuator) * (u_smooth - self.u_applied)
         return self.u_applied
 
-    # -------- Enhanced reward --------
+    # -------- Reward --------
     def _step_cost(self, z_s_ddot: float, travel: float, u: float, du: float, load_factor: float) -> float:
         # Load-aware comfort weighting
         q_acc = 8.0 * (1.0 + 0.5 * abs(load_factor - 1.0))
@@ -946,5 +946,6 @@ if __name__ == "__main__":
     except ImportError:
         print("Running locally")
         import matplotlib.pyplot as plt
+
 
     results, rewards = main()
