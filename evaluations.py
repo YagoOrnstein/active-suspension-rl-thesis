@@ -262,7 +262,7 @@ def print_table(summaries: Dict[str, Dict[float, Dict[str, float]]], speeds: Lis
                   f"{s['u_mean']:>8.1f}")
         print("-" * 118)
 
-# ---------- Plots (existing + extra) ----------
+# ---------- Plots ----------
 def make_comprehensive_plots(summaries_by_road, speeds, road_classes, controllers, outdir):
     os.makedirs(outdir, exist_ok=True)
     colors = {"passive": "#a1a1a1", "lqr": "#1f77b4", "pid": "#ff7f0e", "td3": "#2ca02c"}
@@ -276,7 +276,7 @@ def make_comprehensive_plots(summaries_by_road, speeds, road_classes, controller
     fig, axes = plt.subplots(2, 2, figsize=(16, 12)); axes = axes.flatten()
     for i, speed in enumerate(speeds):
         ax = axes[i]; x_pos = np.arange(len(road_classes))
-        for ctrl in active_controllers:  # <-- CHANGED THIS LINE
+        for ctrl in active_controllers:  
             rms_values = [summaries_by_road[rc][ctrl][speed]["rms_mean"] for rc in road_classes]
             rms_errors = [summaries_by_road[rc][ctrl][speed]["rms_std"] for rc in road_classes]
             ax.errorbar(x_pos, rms_values, yerr=rms_errors, fmt='-o', marker=markers[ctrl],
@@ -306,7 +306,6 @@ def make_comprehensive_plots(summaries_by_road, speeds, road_classes, controller
         plt.tight_layout(); plt.savefig(os.path.join(outdir, "02_td3_advantage.png"), dpi=300, bbox_inches='tight'); plt.close()
 
     # 3) Heatmaps of RMS
-    # 3) Heatmaps of RMS (robust to missing controllers)
     ctrls_to_show = [c for c in ["lqr", "pid", "td3"] if c in controllers]
     if not ctrls_to_show:
         print("(!) No active controllers available for RMS heatmaps; skipping.")
@@ -451,7 +450,7 @@ def plot_example_road(env, outdir):
 def extra_plots(raw, summaries_by_road, speeds, controllers, outdir):
     os.makedirs(outdir, exist_ok=True)
 
-    # (A) Saturation-rate heatmaps (like RMS but for sat %)
+    # (A) Saturation-rate heatmaps
     def heatmap(metric_key, title, fname, scale=100.0):
         fig, axes = plt.subplots(2, 2, figsize=(18, 14)); axes = axes.flatten()
         for i, ctrl in enumerate(controllers[:4]):
@@ -495,7 +494,7 @@ def extra_plots(raw, summaries_by_road, speeds, controllers, outdir):
         plt.tight_layout(); plt.savefig(os.path.join(outdir, "09_mean_abs_u_heatmaps.png"), dpi=300, bbox_inches='tight'); plt.close()
     heatmap_u()
 
-    # (C) RMS vs |u| tradeoff scatter (aggregated over all classes & speeds)
+    # (C) RMS vs |u| tradeoff scatter
     fig, ax = plt.subplots(figsize=(8,6))
     for ctrl in controllers:
         rms_vals, u_vals = [], []
@@ -538,7 +537,7 @@ def thesis_timeseries_and_spectra(env, agent, outdir, controllers):
     ax.grid(True, alpha=0.3); ax.legend(loc='lower right')
     plt.tight_layout(); plt.savefig(os.path.join(outdir, "12_accel_cdf.png"), dpi=300, bbox_inches='tight'); plt.close()
 
-    # Force histograms (exclude passive)
+    # Force histograms
     fig, ax = plt.subplots(figsize=(10,6))
     for c, tr in traces.items():
         if c == "passive": continue
@@ -955,7 +954,7 @@ def plot_friction_characteristics_from_env(env, outdir):
         F[~mask_s] = -np.sign(vv)*(Fb + F_vis*(np.abs(vv)-v_stick))
         return F
 
-    # Build a **temporal** velocity sweep in the env:
+
     # drive over a smooth sinusoidal road to produce relative motion
     dt = float(getattr(env, "dt", 0.001))
     T  = 6.0
@@ -1616,22 +1615,6 @@ def plot_control_smoothness_across_speeds(env, agent=None, speeds=(45.0,), road_
 
 
 def plot_curriculum_vs_random_analysis(raw, outdir, n_permutations=1000, seed=42):
-    """
-    Creates:
-      - curriculum_vs_random.png
-      - training_return_curve.png
-
-    Compares TD3 curriculum order vs random permutations of the same
-    per-scenario 'return per meter' values. Also includes a phase-aware
-    shuffle (keeps 25/35/45/55 km/h phases intact, shuffles within them).
-    Reports:
-      • Final cumulative mean gap
-      • AUC (area-under-cumulative-curve) gap
-      • Permutation p-value (how often random >= curriculum at the end)
-      • Effect size (z score)
-
-    Returns a dict of the computed metrics.
-    """
     import os
     import numpy as np
     import matplotlib.pyplot as plt
@@ -1906,7 +1889,6 @@ def main():
     total_scenarios = len(ROAD_CLASSES) * EPISODES * len(SPEEDS) * len(LOADS)
     scenario_count = 0
 
-    # ---------- NEW: fixed road per (road_class, episode) ----------
     fixed_roads = {}
     for road_class in ROAD_CLASSES:
         for ep in range(EPISODES):
@@ -1967,7 +1949,7 @@ def main():
     for ctrl in ["passive", "lqr", "pid"] + (["td3"] if td3_available else []):
         traces[ctrl] = run_episode_trace(env, ctrl, agent=agent, pid=(pid_ctrl if ctrl=="pid" else None),
                                          speed=35.0, load=1.0, road=road_for_ts, max_steps=min(2000, MAX_STEPS))
-    # Save the timeseries plot (reuse your previous style)
+    # Save the timeseries plot
     fig, axes = plt.subplots(3,1, figsize=(16,10))
     for c, tr in traces.items(): axes[0].plot(tr["t"], tr["acc"], label=c.upper(), linewidth=1.5)
     axes[0].set_ylabel('Body Acc (m/s²)'); axes[0].set_title('Body Acceleration — 35 km/h, Road Class D'); axes[0].legend(); axes[0].grid(True, alpha=0.3)
@@ -2034,7 +2016,6 @@ def main():
             print(f"{road_class} ({class_name_short:<12}) {avg_ret_gap:>+8.3f} {status}        {avg_rms_gap:>+8.3f}")
 
     generate_all_thesis_plots(env, OUTDIR)
-    # After existing thesis plots
     generate_enhanced_validation_plots(env, OUTDIR)
     print("\nGenerating additional analysis plots...")
 
@@ -2062,3 +2043,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
